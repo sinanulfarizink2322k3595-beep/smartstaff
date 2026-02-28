@@ -61,4 +61,38 @@ router.get('/meetings', authenticateToken, requireRole('admin'), (req, res) => {
   res.json(rows);
 });
 
+// DELETE /api/admin/users/:id
+router.delete('/users/:id', authenticateToken, requireRole('admin'), (req, res) => {
+  const targetId = parseInt(req.params.id, 10);
+
+  // Prevent deleting own account
+  if (targetId === req.user.id) {
+    return res.status(400).json({ error: 'You cannot delete your own account' });
+  }
+
+  const target = db.prepare('SELECT id, role FROM users WHERE id = ?').get(targetId);
+  if (!target) return res.status(404).json({ error: 'User not found' });
+
+  // Prevent deleting the last admin
+  if (target.role === 'admin') {
+    const adminCount = db.prepare("SELECT COUNT(*) as count FROM users WHERE role = 'admin'").get().count;
+    if (adminCount <= 1) {
+      return res.status(400).json({ error: 'Cannot delete the last admin account' });
+    }
+  }
+
+  // Cascade-delete related records for staff/student
+  if (target.role === 'staff') {
+    db.prepare('DELETE FROM availability WHERE staff_id = ?').run(targetId);
+    db.prepare('DELETE FROM meetings WHERE staff_id = ?').run(targetId);
+  }
+  if (target.role === 'student') {
+    db.prepare('DELETE FROM outpasses WHERE student_id = ?').run(targetId);
+    db.prepare('DELETE FROM meetings WHERE student_id = ?').run(targetId);
+  }
+
+  db.prepare('DELETE FROM users WHERE id = ?').run(targetId);
+  res.json({ message: 'User deleted successfully' });
+});
+
 module.exports = router;

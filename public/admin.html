@@ -5,13 +5,164 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SmartStaff – Admin Portal</title>
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ── Admin-specific overrides ── */
+    .sidebar {
+      background: linear-gradient(180deg, #1a1740 0%, #0f0c29 100%);
+    }
+    .sidebar-brand { border-bottom-color: rgba(255,255,255,0.1); }
+    .admin-crown { color: #f59e0b; margin-right: 0.25rem; }
+
+    .sidebar-nav a.active,
+    .sidebar-nav a:hover {
+      background: rgba(124,58,237,0.25);
+      border-left-color: #a78bfa;
+      color: #e9d5ff;
+    }
+
+    /* Stat cards with colour accents */
+    .stat-card { border-top: 3px solid transparent; }
+    .stat-card.blue-accent  { border-top-color: #1a73e8; }
+    .stat-card.green-accent { border-top-color: #10b981; }
+    .stat-card.amber-accent { border-top-color: #f59e0b; }
+    .stat-card.purple-accent{ border-top-color: #7c3aed; }
+    .stat-card.red-accent   { border-top-color: #ef4444; }
+
+    /* Action buttons in tables */
+    .btn-delete {
+      padding: 0.25rem 0.6rem;
+      font-size: 0.75rem;
+      background: #fce8e6;
+      color: #c5221f;
+      border: 1px solid #f5c6c3;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.18s;
+      white-space: nowrap;
+    }
+    .btn-delete:hover { background: #ea4335; color: white; border-color: #ea4335; transform: translateY(-1px); }
+
+    /* Section header with action bar */
+    .section-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .section-bar h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .count-badge {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      margin-left: 0.35rem;
+    }
+
+    /* Confirm delete modal */
+    .delete-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,12,41,0.75);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+    }
+    .delete-modal-overlay.open { display: flex; }
+    .delete-modal {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+      width: 100%;
+      max-width: 400px;
+      animation: modalIn 0.22s ease;
+      overflow: hidden;
+    }
+    .delete-modal-header {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .delete-modal-header h3 { color: white; font-size: 1.05rem; font-weight: 700; }
+    .delete-modal-body { padding: 1.5rem; }
+    .delete-modal-body p { color: #374151; font-size: 0.95rem; line-height: 1.6; }
+    .delete-user-name { font-weight: 700; color: #111827; }
+    .delete-modal-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid #f3f4f6;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+    .btn-cancel-delete {
+      padding: 0.6rem 1.25rem;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #374151;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .btn-cancel-delete:hover { background: #e5e7eb; }
+    .btn-confirm-delete {
+      padding: 0.6rem 1.25rem;
+      background: #ef4444;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .btn-confirm-delete:hover { background: #dc2626; }
+
+    /* Quick-stat sparkline dots */
+    .stat-trend {
+      font-size: 0.7rem;
+      color: var(--gray);
+      margin-top: 0.2rem;
+    }
+    .stat-trend.up   { color: #10b981; }
+    .stat-trend.warn { color: #f59e0b; }
+
+    /* Welcome banner */
+    .welcome-banner {
+      background: linear-gradient(135deg, #1a1740, #3730a3);
+      border-radius: 14px;
+      padding: 1.5rem 1.75rem;
+      color: white;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+    .welcome-banner-icon { font-size: 2.5rem; flex-shrink: 0; }
+    .welcome-banner h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .welcome-banner p { font-size: 0.85rem; opacity: 0.75; }
+  </style>
 </head>
 <body>
   <div class="app-wrapper">
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
-        <span class="brand-icon">🎓</span> SmartStaff
+        <span class="brand-icon">🛡️</span>
+        <span class="admin-crown">♛</span> SmartStaff
       </div>
       <nav class="sidebar-nav">
         <a href="#" class="active" data-section="dashboard"><span class="nav-icon">🏠</span> Dashboard</a>
@@ -41,49 +192,64 @@
       </div>
 
       <div class="page-content">
+
         <!-- Dashboard -->
         <div class="content-section active" id="section-dashboard">
+          <div class="welcome-banner">
+            <div class="welcome-banner-icon">🛡️</div>
+            <div>
+              <h2>Welcome back, <span id="banner-name">Admin</span>!</h2>
+              <p>Here's what's happening across SmartStaff today.</p>
+            </div>
+          </div>
+
           <div class="stats-grid">
-            <div class="stat-card">
+            <div class="stat-card blue-accent">
               <div class="stat-icon blue">🎓</div>
               <div class="stat-info">
                 <div class="stat-value" id="stat-students">—</div>
                 <div class="stat-label">Total Students</div>
+                <div class="stat-trend">Registered accounts</div>
               </div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card green-accent">
               <div class="stat-icon green">👩‍🏫</div>
               <div class="stat-info">
                 <div class="stat-value" id="stat-staff">—</div>
                 <div class="stat-label">Total Staff</div>
+                <div class="stat-trend">Active faculty members</div>
               </div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card amber-accent">
               <div class="stat-icon yellow">📋</div>
               <div class="stat-info">
                 <div class="stat-value" id="stat-pending-op">—</div>
                 <div class="stat-label">Pending Outpasses</div>
+                <div class="stat-trend warn" id="op-trend">Awaiting HOD approval</div>
               </div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card purple-accent">
               <div class="stat-icon purple">📅</div>
               <div class="stat-info">
                 <div class="stat-value" id="stat-pending-mt">—</div>
                 <div class="stat-label">Pending Meetings</div>
+                <div class="stat-trend warn" id="mt-trend">Awaiting staff response</div>
               </div>
             </div>
           </div>
 
           <div class="card">
             <div class="card-header">📊 System Overview</div>
-            <p class="text-muted">Welcome to the SmartStaff Admin Panel. Use the sidebar to manage students, staff, outpasses, meetings, and feedback.</p>
+            <p class="text-muted">Use the sidebar to manage students, staff, outpasses, meetings, and feedback. You can view, manage, and delete any user or staff account.</p>
           </div>
         </div>
 
         <!-- Staff Management -->
         <div class="content-section" id="section-staff">
           <div class="card">
-            <div class="card-header">👩‍🏫 Staff Members</div>
+            <div class="section-bar">
+              <h3>👩‍🏫 Staff Members <span class="count-badge" id="staff-count">—</span></h3>
+            </div>
             <div id="staff-container">
               <div class="loading-wrapper"><div class="spinner"></div><p>Loading...</p></div>
             </div>
@@ -93,7 +259,9 @@
         <!-- Student Management -->
         <div class="content-section" id="section-students">
           <div class="card">
-            <div class="card-header">🎓 Registered Students</div>
+            <div class="section-bar">
+              <h3>🎓 Registered Students <span class="count-badge" id="students-count">—</span></h3>
+            </div>
             <div id="students-container">
               <div class="loading-wrapper"><div class="spinner"></div><p>Loading...</p></div>
             </div>
@@ -129,26 +297,46 @@
             </div>
           </div>
         </div>
-      </div>
+
+      </div><!-- /page-content -->
     </main>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="delete-modal-overlay" id="delete-modal-overlay">
+    <div class="delete-modal">
+      <div class="delete-modal-header">
+        <span style="font-size:1.5rem">🗑️</span>
+        <h3>Confirm Deletion</h3>
+      </div>
+      <div class="delete-modal-body">
+        <p>Are you sure you want to permanently delete <span class="delete-user-name" id="delete-user-name">this user</span>?</p>
+        <p style="margin-top:0.6rem; font-size:0.85rem; color:#6b7280;">This action is irreversible. All related outpasses, meetings, and availability records will also be removed.</p>
+      </div>
+      <div class="delete-modal-footer">
+        <button class="btn-cancel-delete" onclick="closeDeleteModal()">Cancel</button>
+        <button class="btn-confirm-delete" id="confirm-delete-btn" onclick="confirmDelete()">🗑️ Delete</button>
+      </div>
+    </div>
   </div>
 
   <div id="toast-container"></div>
 
   <script>
     const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    const user  = JSON.parse(localStorage.getItem('user') || 'null');
     if (!token || !user || user.role !== 'admin') {
-      window.location.href = 'index.html';
+      window.location.href = 'admin-login.html';
     }
 
-    document.getElementById('user-name').textContent = user.name;
+    document.getElementById('user-name').textContent  = user.name;
+    document.getElementById('banner-name').textContent = user.name.split(' ')[0];
     document.getElementById('user-avatar').textContent = user.name.charAt(0).toUpperCase();
 
     function logout() {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = 'index.html';
+      window.location.href = 'admin-login.html';
     }
 
     function toggleSidebar() {
@@ -179,10 +367,10 @@
 
     function esc(str) {
       if (!str) return '';
-      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
-    // Navigation
+    // ── Navigation ──
     const titles = {
       dashboard: 'Dashboard',
       staff: 'Staff Management',
@@ -191,7 +379,6 @@
       meetings: 'Meeting Analytics',
       feedback: 'Feedback'
     };
-
     const sectionLoaders = {
       staff: loadStaff,
       students: loadStudents,
@@ -214,83 +401,176 @@
       });
     });
 
+    // ── Stats ──
     async function loadStats() {
       const res = await apiFetch('/api/admin/stats');
       if (!res) return;
       const data = await res.json();
-      document.getElementById('stat-students').textContent = data.studentCount;
-      document.getElementById('stat-staff').textContent = data.staffCount;
-      document.getElementById('stat-pending-op').textContent = data.pendingOutpasses;
-      document.getElementById('stat-pending-mt').textContent = data.pendingMeetings;
+      document.getElementById('stat-students').textContent    = data.studentCount;
+      document.getElementById('stat-staff').textContent       = data.staffCount;
+      document.getElementById('stat-pending-op').textContent  = data.pendingOutpasses;
+      document.getElementById('stat-pending-mt').textContent  = data.pendingMeetings;
+      if (data.pendingOutpasses === 0)
+        document.getElementById('op-trend').textContent = '✅ All clear';
+      if (data.pendingMeetings === 0)
+        document.getElementById('mt-trend').textContent = '✅ All clear';
     }
 
+    // ── Delete modal state ──
+    let pendingDeleteId   = null;
+    let pendingDeleteType = null; // 'staff' | 'student'
+
+    function openDeleteModal(id, name, type) {
+      pendingDeleteId   = id;
+      pendingDeleteType = type;
+      document.getElementById('delete-user-name').textContent = name;
+      document.getElementById('delete-modal-overlay').classList.add('open');
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('delete-modal-overlay').classList.remove('open');
+      pendingDeleteId   = null;
+      pendingDeleteType = null;
+    }
+
+    async function confirmDelete() {
+      if (!pendingDeleteId) return;
+      const btn = document.getElementById('confirm-delete-btn');
+      btn.disabled = true;
+      btn.textContent = 'Deleting…';
+
+      try {
+        const res = await apiFetch(`/api/admin/users/${pendingDeleteId}`, { method: 'DELETE' });
+        if (!res) return;
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          showToast(data.error || 'Deletion failed', 'error');
+        } else {
+          showToast('User deleted successfully', 'success');
+          closeDeleteModal();
+          // Reload the current section
+          if (pendingDeleteType === 'staff') loadStaff();
+          else loadStudents();
+          loadStats();
+        }
+      } catch (err) {
+        showToast('Connection error', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🗑️ Delete';
+        pendingDeleteId   = null;
+        pendingDeleteType = null;
+      }
+    }
+
+    // Close modal on overlay click
+    document.getElementById('delete-modal-overlay').addEventListener('click', function(e) {
+      if (e.target === this) closeDeleteModal();
+    });
+
+    // ── Staff ──
     async function loadStaff() {
+      document.getElementById('staff-container').innerHTML =
+        '<div class="loading-wrapper"><div class="spinner"></div><p>Loading...</p></div>';
       const res = await apiFetch('/api/admin/staff');
       if (!res) return;
       const data = await res.json();
 
+      document.getElementById('staff-count').textContent = data.length;
+
       if (!data.length) {
-        document.getElementById('staff-container').innerHTML = '<div class="empty-state"><div class="empty-icon">👩‍🏫</div><p>No staff found</p></div>';
+        document.getElementById('staff-container').innerHTML =
+          '<div class="empty-state"><div class="empty-icon">👩‍🏫</div><p>No staff found</p></div>';
         return;
       }
 
       let html = `<div class="table-wrapper"><table class="table">
         <thead><tr>
-          <th>#</th><th>Name</th><th>Email</th><th>Department</th><th>Availability Slots</th><th>Status</th>
+          <th>#</th><th>Name</th><th>Email</th><th>Role</th><th>Slots</th><th>Status</th><th>Action</th>
         </tr></thead><tbody>`;
 
       data.forEach((s, i) => {
-        const slots = s.availability.length;
         html += `<tr>
           <td>${i + 1}</td>
           <td><strong>${esc(s.name)}</strong></td>
-          <td>${esc(s.email)}</td>
+          <td class="text-muted">${esc(s.email)}</td>
           <td><span class="badge badge-${s.department === 'HOD' ? 'primary' : 'info'}">${esc(s.department)}</span></td>
-          <td>${slots} slots configured</td>
+          <td>${s.availability.length} slots</td>
           <td><span class="badge badge-${s.is_verified ? 'approved' : 'pending'}">${s.is_verified ? 'Active' : 'Unverified'}</span></td>
+          <td>
+            <button class="btn-delete" data-id="${s.id}" data-name="${esc(s.name)}" data-type="staff">
+              🗑️ Remove
+            </button>
+          </td>
         </tr>`;
       });
       html += '</tbody></table></div>';
       document.getElementById('staff-container').innerHTML = html;
+
+      document.getElementById('staff-container').addEventListener('click', function handleStaffDelete(e) {
+        const btn = e.target.closest('.btn-delete');
+        if (!btn) return;
+        openDeleteModal(parseInt(btn.dataset.id, 10), btn.dataset.name, btn.dataset.type);
+      }, { once: true });
     }
 
+    // ── Students ──
     async function loadStudents() {
+      document.getElementById('students-container').innerHTML =
+        '<div class="loading-wrapper"><div class="spinner"></div><p>Loading...</p></div>';
       const res = await apiFetch('/api/admin/students');
       if (!res) return;
       const data = await res.json();
 
+      document.getElementById('students-count').textContent = data.length;
+
       if (!data.length) {
-        document.getElementById('students-container').innerHTML = '<div class="empty-state"><div class="empty-icon">🎓</div><p>No students found</p></div>';
+        document.getElementById('students-container').innerHTML =
+          '<div class="empty-state"><div class="empty-icon">🎓</div><p>No students found</p></div>';
         return;
       }
 
       let html = `<div class="table-wrapper"><table class="table">
         <thead><tr>
-          <th>#</th><th>Name</th><th>Email</th><th>Roll No.</th><th>Department</th><th>Status</th><th>Joined</th>
+          <th>#</th><th>Name</th><th>Email</th><th>Roll No.</th><th>Department</th><th>Status</th><th>Joined</th><th>Action</th>
         </tr></thead><tbody>`;
 
       data.forEach((s, i) => {
         html += `<tr>
           <td>${i + 1}</td>
           <td><strong>${esc(s.name)}</strong></td>
-          <td>${esc(s.email)}</td>
+          <td class="text-muted">${esc(s.email)}</td>
           <td>${esc(s.roll_number || '—')}</td>
           <td>${esc(s.department || '—')}</td>
           <td><span class="badge badge-${s.is_verified ? 'approved' : 'pending'}">${s.is_verified ? 'Verified' : 'Unverified'}</span></td>
-          <td class="text-muted">${s.created_at ? s.created_at.substring(0, 10) : '—'}</td>
+          <td class="text-muted">${s.created_at ? s.created_at.substring(0,10) : '—'}</td>
+          <td>
+            <button class="btn-delete" data-id="${s.id}" data-name="${esc(s.name)}" data-type="student">
+              🗑️ Remove
+            </button>
+          </td>
         </tr>`;
       });
       html += '</tbody></table></div>';
       document.getElementById('students-container').innerHTML = html;
+
+      document.getElementById('students-container').addEventListener('click', function handleStudentDelete(e) {
+        const btn = e.target.closest('.btn-delete');
+        if (!btn) return;
+        openDeleteModal(parseInt(btn.dataset.id, 10), btn.dataset.name, btn.dataset.type);
+      }, { once: true });
     }
 
+    // ── Outpasses ──
     async function loadOutpasses() {
       const res = await apiFetch('/api/admin/outpasses');
       if (!res) return;
       const data = await res.json();
 
       if (!data.length) {
-        document.getElementById('outpasses-container').innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>No outpass requests found</p></div>';
+        document.getElementById('outpasses-container').innerHTML =
+          '<div class="empty-state"><div class="empty-icon">📋</div><p>No outpass requests found</p></div>';
         return;
       }
 
@@ -315,13 +595,15 @@
       document.getElementById('outpasses-container').innerHTML = html;
     }
 
+    // ── Meetings ──
     async function loadMeetings() {
       const res = await apiFetch('/api/admin/meetings');
       if (!res) return;
       const data = await res.json();
 
       if (!data.length) {
-        document.getElementById('meetings-container').innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><p>No meetings found</p></div>';
+        document.getElementById('meetings-container').innerHTML =
+          '<div class="empty-state"><div class="empty-icon">📅</div><p>No meetings found</p></div>';
         return;
       }
 
@@ -345,13 +627,15 @@
       document.getElementById('meetings-container').innerHTML = html;
     }
 
+    // ── Feedback ──
     async function loadFeedback() {
       const res = await apiFetch('/api/feedback');
       if (!res) return;
       const data = await res.json();
 
       if (!data.length) {
-        document.getElementById('feedback-container').innerHTML = '<div class="empty-state"><div class="empty-icon">💌</div><p>No feedback submitted yet</p></div>';
+        document.getElementById('feedback-container').innerHTML =
+          '<div class="empty-state"><div class="empty-icon">💌</div><p>No feedback submitted yet</p></div>';
         return;
       }
 
@@ -365,11 +649,11 @@
         html += `<tr>
           <td>${i + 1}</td>
           <td>${esc(row.name || 'Anonymous')}</td>
-          <td>${esc(row.email || '—')}</td>
+          <td class="text-muted">${esc(row.email || '—')}</td>
           <td>${esc(row.subject || '—')}</td>
           <td style="max-width:300px">${esc(row.message)}</td>
           <td>${stars}</td>
-          <td class="text-muted">${row.created_at ? row.created_at.substring(0, 10) : '—'}</td>
+          <td class="text-muted">${row.created_at ? row.created_at.substring(0,10) : '—'}</td>
         </tr>`;
       });
       html += '</tbody></table></div>';
@@ -381,3 +665,4 @@
   </script>
 </body>
 </html>
+

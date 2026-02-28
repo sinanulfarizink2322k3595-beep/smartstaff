@@ -20,6 +20,20 @@
     .divider::before { left: 0; }
     .divider::after { right: 0; }
     .verify-info { font-size: 0.8rem; color: var(--gray); background: var(--gray-light); padding: 0.5rem 0.75rem; border-radius: var(--radius); margin-top: 0.5rem; }
+    .admin-portal-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: rgba(255,255,255,0.5);
+      font-size: 0.78rem;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      transition: all 0.2s;
+      margin-top: 0.5rem;
+    }
+    .admin-portal-link:hover { color: rgba(255,255,255,0.9); border-color: rgba(255,255,255,0.5); text-decoration: none; }
   </style>
 </head>
 <body>
@@ -43,39 +57,22 @@
 
           <!-- Tabs -->
           <div class="tabs">
-            <button class="tab-btn active" data-tab="admin">Admin</button>
-            <button class="tab-btn" data-tab="staff">Staff</button>
+            <button class="tab-btn active" data-tab="staff">Staff</button>
             <button class="tab-btn" data-tab="student">Student</button>
           </div>
 
-          <!-- Admin Tab -->
+          <!-- Staff Tab -->
           <div class="tab-content">
-            <div class="tab-pane active" id="tab-admin">
-              <div id="admin-alert"></div>
-              <form id="admin-login-form">
-                <div class="form-group">
-                  <label class="form-label">Email</label>
-                  <input type="email" id="admin-email" class="form-control" placeholder="admin@smartstaff.com" required />
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Password</label>
-                  <input type="password" id="admin-password" class="form-control" placeholder="Enter password" required />
-                </div>
-                <button type="submit" class="btn btn-primary btn-block btn-lg mt-2">Sign In as Admin</button>
-              </form>
-            </div>
-
-            <!-- Staff Tab -->
-            <div class="tab-pane" id="tab-staff">
+            <div class="tab-pane active" id="tab-staff">
               <div id="staff-alert"></div>
               <form id="staff-login-form">
                 <div class="form-group">
                   <label class="form-label">Email</label>
-                  <input type="email" id="staff-email" class="form-control" placeholder="staff@smartstaff.com" required />
+                  <input type="email" id="staff-email" class="form-control" placeholder="staff@smartstaff.com" required autocomplete="username" />
                 </div>
                 <div class="form-group">
                   <label class="form-label">Password</label>
-                  <input type="password" id="staff-password" class="form-control" placeholder="Enter password" required />
+                  <input type="password" id="staff-password" class="form-control" placeholder="Enter password" required autocomplete="current-password" />
                 </div>
                 <button type="submit" class="btn btn-primary btn-block btn-lg mt-2">Sign In as Staff</button>
               </form>
@@ -90,11 +87,11 @@
                 <form id="student-login-form">
                   <div class="form-group">
                     <label class="form-label">Email</label>
-                    <input type="email" id="student-email" class="form-control" placeholder="student@email.com" required />
+                    <input type="email" id="student-email" class="form-control" placeholder="student@email.com" required autocomplete="username" />
                   </div>
                   <div class="form-group">
                     <label class="form-label">Password</label>
-                    <input type="password" id="student-password" class="form-control" placeholder="Enter password" required />
+                    <input type="password" id="student-password" class="form-control" placeholder="Enter password" required autocomplete="current-password" />
                   </div>
                   <button type="submit" class="btn btn-primary btn-block btn-lg mt-2">Sign In as Student</button>
                 </form>
@@ -125,7 +122,7 @@
                   </div>
                   <div class="form-group">
                     <label class="form-label">Password</label>
-                    <input type="password" id="reg-password" class="form-control" placeholder="Choose password" required />
+                    <input type="password" id="reg-password" class="form-control" placeholder="Choose password" required autocomplete="new-password" />
                   </div>
                   <button type="submit" class="btn btn-primary btn-block btn-lg">Register</button>
                 </form>
@@ -137,9 +134,10 @@
           </div>
         </div>
 
-        <p class="text-center mt-2" style="color: rgba(255,255,255,0.7); font-size: 0.8rem;">
-          &copy; 2024 SmartStaff. All rights reserved.
-        </p>
+        <div class="text-center mt-2" style="display:flex; flex-direction:column; align-items:center; gap:0.5rem;">
+          <p style="color: rgba(255,255,255,0.7); font-size: 0.8rem;">&copy; 2024 SmartStaff. All rights reserved.</p>
+          <a href="admin-login.html" class="admin-portal-link">🛡️ Administrator Portal</a>
+        </div>
       </div>
     </main>
   </div>
@@ -196,22 +194,12 @@
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
 
-        const redirectMap = { admin: 'admin.html', staff: 'staff.html', student: 'student.html' };
+        const redirectMap = { staff: 'staff.html', student: 'student.html' };
         window.location.href = redirectMap[data.user.role];
       } catch (e) {
         showAlert(alertId, 'Connection error. Please try again.');
       }
     }
-
-    // Admin login
-    document.getElementById('admin-login-form').addEventListener('submit', e => {
-      e.preventDefault();
-      doLogin(
-        document.getElementById('admin-email').value,
-        document.getElementById('admin-password').value,
-        'admin-alert', 'admin'
-      );
-    });
 
     // Staff login
     document.getElementById('staff-login-form').addEventListener('submit', e => {
@@ -277,3 +265,4 @@
   </script>
 </body>
 </html>
+

@@ -36,8 +36,12 @@ app.use('/api/admin', apiLimiter, require('./routes/admin'));
 app.use('/api/feedback', apiLimiter, require('./routes/feedback'));
 
 // Root
-app.get('/', (req, res) => {
+app.get('/', apiLimiter, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/admin-login', apiLimiter, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin-login.html'));
 });
 
 app.listen(PORT, () => {
