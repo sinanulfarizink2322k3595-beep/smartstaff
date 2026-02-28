@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartStaff – Student Portal</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-icon">🎓</span> SmartStaff
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" class="active" data-section="dashboard"><span class="nav-icon">🏠</span> Dashboard</a>
+        <a href="#" data-section="outpass"><span class="nav-icon">📋</span> Outpass Request</a>
+        <a href="#" data-section="meeting"><span class="nav-icon">📅</span> Meeting Request</a>
+        <a href="#" data-section="availability"><span class="nav-icon">📊</span> Staff Availability</a>
+        <a href="#" data-section="my-outpasses"><span class="nav-icon">📁</span> My Outpasses</a>
+        <a href="#" data-section="my-meetings"><span class="nav-icon">💬</span> My Meetings</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="avatar" id="user-avatar">S</div>
+          <div class="user-info">
+            <div class="user-name" id="user-name">Student</div>
+            <div class="user-role">Student</div>
+          </div>
+        </div>
+        <button class="btn-logout" onclick="logout()">🚪 Logout</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="top-bar">
+        <h1 id="page-title">Dashboard</h1>
+        <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+      </div>
+
+      <div class="page-content">
+        <!-- Dashboard -->
+        <div class="content-section active" id="section-dashboard">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon blue">📋</div>
+              <div class="stat-info">
+                <div class="stat-value" id="stat-outpasses">0</div>
+                <div class="stat-label">My Outpasses</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon green">📅</div>
+              <div class="stat-info">
+                <div class="stat-value" id="stat-meetings">0</div>
+                <div class="stat-label">My Meetings</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon yellow">⏳</div>
+              <div class="stat-info">
+                <div class="stat-value" id="stat-pending">0</div>
+                <div class="stat-label">Pending Requests</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">👋 Welcome to SmartStaff Student Portal</div>
+            <p class="text-muted">Use the sidebar to navigate. You can submit outpass requests, schedule meetings with staff, and view staff availability.</p>
+          </div>
+        </div>
+
+        <!-- Outpass Request -->
+        <div class="content-section" id="section-outpass">
+          <div class="card">
+            <div class="card-header">📋 New Outpass Request</div>
+            <div id="outpass-alert"></div>
+            <form id="outpass-form">
+              <div class="form-group">
+                <label class="form-label">Reason</label>
+                <textarea id="op-reason" class="form-control" rows="3" placeholder="Reason for outpass..." required></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Destination</label>
+                <input type="text" id="op-destination" class="form-control" placeholder="Where are you going?" required />
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">From Date</label>
+                  <input type="date" id="op-from" class="form-control" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">To Date</label>
+                  <input type="date" id="op-to" class="form-control" required />
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary">Submit Outpass Request</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Meeting Request -->
+        <div class="content-section" id="section-meeting">
+          <div class="card">
+            <div class="card-header">📅 Schedule a Meeting</div>
+            <div id="meeting-alert"></div>
+            <form id="meeting-form">
+              <div class="form-group">
+                <label class="form-label">Select Staff</label>
+                <select id="meet-staff" class="form-control" required>
+                  <option value="">-- Select Staff Member --</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Purpose</label>
+                <select id="meet-purpose" class="form-control" required>
+                  <option value="">-- Select Purpose --</option>
+                  <option value="Academic Discussion">Academic Discussion</option>
+                  <option value="Project Guidance">Project Guidance</option>
+                  <option value="Doubt Clarification">Doubt Clarification</option>
+                  <option value="Career Counseling">Career Counseling</option>
+                  <option value="Assignment Review">Assignment Review</option>
+                  <option value="Research Discussion">Research Discussion</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Preferred Date</label>
+                  <input type="date" id="meet-date" class="form-control" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Preferred Time</label>
+                  <input type="time" id="meet-time" class="form-control" required />
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary">Submit Meeting Request</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Staff Availability -->
+        <div class="content-section" id="section-availability">
+          <div class="chart-container mb-2">
+            <div class="section-header">
+              <div class="section-title">📊 Staff Availability Overview</div>
+            </div>
+            <canvas id="availabilityChart"></canvas>
+          </div>
+
+          <div class="card">
+            <div class="card-header">📅 Detailed Availability</div>
+            <div id="availability-list">
+              <div class="loading-wrapper"><div class="spinner"></div><p>Loading availability...</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- My Outpasses -->
+        <div class="content-section" id="section-my-outpasses">
+          <div class="card">
+            <div class="card-header">📁 My Outpass Requests</div>
+            <div id="my-outpasses-container">
+              <div class="loading-wrapper"><div class="spinner"></div><p>Loading...</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- My Meetings -->
+        <div class="content-section" id="section-my-meetings">
+          <div class="card">
+            <div class="card-header">💬 My Meeting Requests</div>
+            <div id="my-meetings-container">
+              <div class="loading-wrapper"><div class="spinner"></div><p>Loading...</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script>
+    // Auth guard
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    if (!token || !user || user.role !== 'student') {
+      window.location.href = 'index.html';
+    }
+
+    // Set user info
+    document.getElementById('user-name').textContent = user.name;
+    document.getElementById('user-avatar').textContent = user.name.charAt(0).toUpperCase();
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'index.html';
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    function showToast(msg, type = 'success') {
+      const c = document.getElementById('toast-container');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+
+    function showAlert(id, msg, type = 'danger') {
+      const el = document.getElementById(id);
+      el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+      setTimeout(() => el.innerHTML = '', 5000);
+    }
+
+    async function apiFetch(url, options = {}) {
+      const res = await fetch(url, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          ...(options.headers || {})
+        }
+      });
+      if (res.status === 401) {
+        logout();
+        return null;
+      }
+      return res;
+    }
+
+    // Navigation
+    const titles = {
+      dashboard: 'Dashboard',
+      outpass: 'Outpass Request',
+      meeting: 'Meeting Request',
+      availability: 'Staff Availability',
+      'my-outpasses': 'My Outpasses',
+      'my-meetings': 'My Meetings'
+    };
+
+    const sectionLoaders = {
+      availability: loadAvailability,
+      'my-outpasses': loadMyOutpasses,
+      'my-meetings': loadMyMeetings,
+      meeting: loadStaffForMeeting
+    };
+
+    document.querySelectorAll('.sidebar-nav a').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const sec = link.dataset.section;
+        document.querySelectorAll('.sidebar-nav a').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        document.getElementById('section-' + sec).classList.add('active');
+        document.getElementById('page-title').textContent = titles[sec] || sec;
+        if (sectionLoaders[sec]) sectionLoaders[sec]();
+        document.getElementById('sidebar').classList.remove('open');
+      });
+    });
+
+    // Outpass form
+    document.getElementById('outpass-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const body = {
+        reason: document.getElementById('op-reason').value,
+        destination: document.getElementById('op-destination').value,
+        from_date: document.getElementById('op-from').value,
+        to_date: document.getElementById('op-to').value
+      };
+      const res = await apiFetch('/api/outpass', { method: 'POST', body: JSON.stringify(body) });
+      if (!res) return;
+      const data = await res.json();
+      if (res.ok) {
+        showAlert('outpass-alert', 'Outpass request submitted successfully!', 'success');
+        document.getElementById('outpass-form').reset();
+        showToast('Outpass submitted!');
+        loadDashboardStats();
+      } else {
+        showAlert('outpass-alert', data.error || 'Failed to submit');
+      }
+    });
+
+    // Meeting form
+    document.getElementById('meeting-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const body = {
+        staff_id: parseInt(document.getElementById('meet-staff').value),
+        purpose: document.getElementById('meet-purpose').value,
+        preferred_date: document.getElementById('meet-date').value,
+        preferred_time: document.getElementById('meet-time').value
+      };
+      const res = await apiFetch('/api/meetings', { method: 'POST', body: JSON.stringify(body) });
+      if (!res) return;
+      const data = await res.json();
+      if (res.ok) {
+        showAlert('meeting-alert', 'Meeting request submitted successfully!', 'success');
+        document.getElementById('meeting-form').reset();
+        showToast('Meeting request submitted!');
+        loadDashboardStats();
+      } else {
+        showAlert('meeting-alert', data.error || 'Failed to submit');
+      }
+    });
+
+    async function loadStaffForMeeting() {
+      const select = document.getElementById('meet-staff');
+      if (select.options.length > 1) return;
+      const res = await apiFetch('/api/availability');
+      if (!res) return;
+      const data = await res.json();
+      const seen = new Set();
+      data.forEach(row => {
+        if (!seen.has(row.staff_id)) {
+          seen.add(row.staff_id);
+          const opt = document.createElement('option');
+          opt.value = row.staff_id;
+          opt.textContent = `${row.staff_name} (${row.department})`;
+          select.appendChild(opt);
+        }
+      });
+    }
+
+    let chartInstance = null;
+    async function loadAvailability() {
+      const res = await fetch('/api/availability');
+      if (!res.ok) return;
+      const data = await res.json();
+
+      // Build availability map
+      const staffMap = {};
+      data.forEach(row => {
+        if (!staffMap[row.staff_name]) staffMap[row.staff_name] = new Set();
+        staffMap[row.staff_name].add(row.day_of_week);
+      });
+
+      const names = Object.keys(staffMap);
+      const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const counts = names.map(n => days.filter(d => staffMap[n].has(d)).length);
+
+      // Chart
+      const ctx = document.getElementById('availabilityChart').getContext('2d');
+      if (chartInstance) chartInstance.destroy();
+      chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: names,
+          datasets: [{
+            label: 'Available Days per Week',
+            data: counts,
+            backgroundColor: 'rgba(26, 115, 232, 0.7)',
+            borderColor: 'rgba(26, 115, 232, 1)',
+            borderWidth: 1,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            title: { display: true, text: 'Staff Availability (Days per Week)' }
+          },
+          scales: {
+            y: { beginAtZero: true, max: 6, ticks: { stepSize: 1 } }
+          }
+        }
+      });
+
+      // Detailed table
+      const grouped = {};
+      data.forEach(row => {
+        if (!grouped[row.staff_name]) grouped[row.staff_name] = { department: row.department, slots: [] };
+        grouped[row.staff_name].slots.push(row);
+      });
+
+      let html = '';
+      for (const [name, info] of Object.entries(grouped)) {
+        html += `<div class="avail-day mb-2">
+          <h4>${name} <span class="badge badge-info" style="font-size:0.7rem">${info.department}</span></h4>
+          <div class="avail-slots">`;
+        info.slots.forEach(s => {
+          html += `<span class="avail-slot ${s.slot}">${s.day_of_week} ${s.slot} (${s.start_time}–${s.end_time})</span>`;
+        });
+        html += `</div></div>`;
+      }
+
+      document.getElementById('availability-list').innerHTML = html || '<div class="empty-state"><div class="empty-icon">📅</div><p>No availability data</p></div>';
+    }
+
+    async function loadMyOutpasses() {
+      const res = await apiFetch('/api/outpass/my');
+      if (!res) return;
+      const data = await res.json();
+
+      if (!data.length) {
+        document.getElementById('my-outpasses-container').innerHTML = '<div class="empty-state"><div class="empty-icon">📁</div><p>No outpass requests yet</p></div>';
+        return;
+      }
+
+      let html = `<div class="table-wrapper"><table class="table">
+        <thead><tr>
+          <th>#</th><th>Reason</th><th>Destination</th><th>From</th><th>To</th><th>Status</th><th>HOD Comment</th><th>Date</th>
+        </tr></thead><tbody>`;
+      data.forEach((row, i) => {
+        html += `<tr>
+          <td>${i + 1}</td>
+          <td>${esc(row.reason)}</td>
+          <td>${esc(row.destination)}</td>
+          <td>${row.from_date}</td>
+          <td>${row.to_date}</td>
+          <td><span class="badge badge-${row.status}">${row.status}</span></td>
+          <td>${row.hod_comment ? esc(row.hod_comment) : '<span class="text-muted">—</span>'}</td>
+          <td class="text-muted">${row.created_at ? row.created_at.substring(0, 10) : ''}</td>
+        </tr>`;
+      });
+      html += '</tbody></table></div>';
+      document.getElementById('my-outpasses-container').innerHTML = html;
+    }
+
+    async function loadMyMeetings() {
+      const res = await apiFetch('/api/meetings/my');
+      if (!res) return;
+      const data = await res.json();
+
+      if (!data.length) {
+        document.getElementById('my-meetings-container').innerHTML = '<div class="empty-state"><div class="empty-icon">💬</div><p>No meeting requests yet</p></div>';
+        return;
+      }
+
+      let html = `<div class="table-wrapper"><table class="table">
+        <thead><tr>
+          <th>#</th><th>Staff</th><th>Purpose</th><th>Date</th><th>Time</th><th>Status</th><th>Comment</th>
+        </tr></thead><tbody>`;
+      data.forEach((row, i) => {
+        html += `<tr>
+          <td>${i + 1}</td>
+          <td>${esc(row.staff_name)}<br><span class="text-muted">${esc(row.staff_department)}</span></td>
+          <td>${esc(row.purpose)}</td>
+          <td>${row.preferred_date}</td>
+          <td>${row.preferred_time}</td>
+          <td><span class="badge badge-${row.status}">${row.status}</span></td>
+          <td>${row.staff_comment ? esc(row.staff_comment) : '<span class="text-muted">—</span>'}</td>
+        </tr>`;
+      });
+      html += '</tbody></table></div>';
+      document.getElementById('my-meetings-container').innerHTML = html;
+    }
+
+    async function loadDashboardStats() {
+      const [opRes, meetRes] = await Promise.all([
+        apiFetch('/api/outpass/my'),
+        apiFetch('/api/meetings/my')
+      ]);
+      if (!opRes || !meetRes) return;
+      const outpasses = await opRes.json();
+      const meetings = await meetRes.json();
+      document.getElementById('stat-outpasses').textContent = outpasses.length;
+      document.getElementById('stat-meetings').textContent = meetings.length;
+      const pending = [...outpasses, ...meetings].filter(r => r.status === 'pending').length;
+      document.getElementById('stat-pending').textContent = pending;
+    }
+
+    function esc(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Init
+    loadDashboardStats();
+    loadStaffForMeeting();
+  </script>
+</body>
+</html>

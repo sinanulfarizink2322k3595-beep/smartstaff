@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartStaff – Admin Portal</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-icon">🎓</span> SmartStaff
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" class="active" data-section="dashboard"><span class="nav-icon">🏠</span> Dashboard</a>
+        <a href="#" data-section="staff"><span class="nav-icon">👩‍🏫</span> Staff Management</a>
+        <a href="#" data-section="students"><span class="nav-icon">🎓</span> Student Management</a>
+        <a href="#" data-section="outpasses"><span class="nav-icon">📋</span> Outpass Analytics</a>
+        <a href="#" data-section="meetings"><span class="nav-icon">📅</span> Meeting Analytics</a>
+        <a href="#" data-section="feedback"><span class="nav-icon">💌</span> Feedback</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="avatar" id="user-avatar">A</div>
+          <div class="user-info">
+            <div class="user-name" id="user-name">Admin</div>
+            <div class="user-role">Administrator</div>
+          </div>
+        </div>
+        <button class="btn-logout" onclick="logout()">🚪 Logout</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="top-bar">
+        <h1 id="page-title">Dashboard</h1>
+        <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+      </div>
+
+      <div class="page-content">
+        <!-- Dashboard -->
+        <div class="content-section active" id="section-dashboard">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon blue">🎓</div>
+              <div class="stat-info">
+                <div class="stat-value" id="stat-students">—</div>
+                <div class="stat-label">Total Students</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon green">👩‍🏫</div>
+              <div class="stat-info">
+                <div class="stat-value" id="stat-staff">—</div>
+                <div class="stat-label">Total Staff</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon yellow">📋</div>
+              <div class="stat-info">
+                <div class="stat-value" id="stat-pending-op">—</div>
+                <div class="stat-label">Pending Outpasses</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon purple">📅</div>
+              <div class="stat-info">
+                <div class="stat-value" id="stat-pending-mt">—</div>
+                <div class="stat-label">Pending Meetings</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">📊 System Overview</div>
+            <p class="text-muted">Welcome to the SmartStaff Admin Panel. Use the sidebar to manage students, staff, outpasses, meetings, and feedback.</p>
+          </div>
+        </div>
+
+        <!-- Staff Management -->
+        <div class="content-section" id="section-staff">
+          <div class="card">
+            <div class="card-header">👩‍🏫 Staff Members</div>
+            <div id="staff-container">
+              <div class="loading-wrapper"><div class="spinner"></div><p>Loading...</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Student Management -->
+        <div class="content-section" id="section-students">
+          <div class="card">
+            <div class="card-header">🎓 Registered Students</div>
+            <div id="students-container">
+              <div class="loading-wrapper"><div class="spinner"></div><p>Loading...</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Outpass Analytics -->
+        <div class="content-section" id="section-outpasses">
+          <div class="card">
+            <div class="card-header">📋 All Outpass Requests</div>
+            <div id="outpasses-container">
+              <div class="loading-wrapper"><div class="spinner"></div><p>Loading...</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Meeting Analytics -->
+        <div class="content-section" id="section-meetings">
+          <div class="card">
+            <div class="card-header">📅 All Meeting Requests</div>
+            <div id="meetings-container">
+              <div class="loading-wrapper"><div class="spinner"></div><p>Loading...</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feedback -->
+        <div class="content-section" id="section-feedback">
+          <div class="card">
+            <div class="card-header">💌 Submitted Feedback</div>
+            <div id="feedback-container">
+              <div class="loading-wrapper"><div class="spinner"></div><p>Loading...</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    if (!token || !user || user.role !== 'admin') {
+      window.location.href = 'index.html';
+    }
+
+    document.getElementById('user-name').textContent = user.name;
+    document.getElementById('user-avatar').textContent = user.name.charAt(0).toUpperCase();
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'index.html';
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    function showToast(msg, type = 'success') {
+      const c = document.getElementById('toast-container');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+
+    async function apiFetch(url, options = {}) {
+      const res = await fetch(url, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          ...(options.headers || {})
+        }
+      });
+      if (res.status === 401) { logout(); return null; }
+      return res;
+    }
+
+    function esc(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Navigation
+    const titles = {
+      dashboard: 'Dashboard',
+      staff: 'Staff Management',
+      students: 'Student Management',
+      outpasses: 'Outpass Analytics',
+      meetings: 'Meeting Analytics',
+      feedback: 'Feedback'
+    };
+
+    const sectionLoaders = {
+      staff: loadStaff,
+      students: loadStudents,
+      outpasses: loadOutpasses,
+      meetings: loadMeetings,
+      feedback: loadFeedback
+    };
+
+    document.querySelectorAll('.sidebar-nav a').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const sec = link.dataset.section;
+        document.querySelectorAll('.sidebar-nav a').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        document.getElementById('section-' + sec).classList.add('active');
+        document.getElementById('page-title').textContent = titles[sec] || sec;
+        if (sectionLoaders[sec]) sectionLoaders[sec]();
+        document.getElementById('sidebar').classList.remove('open');
+      });
+    });
+
+    async function loadStats() {
+      const res = await apiFetch('/api/admin/stats');
+      if (!res) return;
+      const data = await res.json();
+      document.getElementById('stat-students').textContent = data.studentCount;
+      document.getElementById('stat-staff').textContent = data.staffCount;
+      document.getElementById('stat-pending-op').textContent = data.pendingOutpasses;
+      document.getElementById('stat-pending-mt').textContent = data.pendingMeetings;
+    }
+
+    async function loadStaff() {
+      const res = await apiFetch('/api/admin/staff');
+      if (!res) return;
+      const data = await res.json();
+
+      if (!data.length) {
+        document.getElementById('staff-container').innerHTML = '<div class="empty-state"><div class="empty-icon">👩‍🏫</div><p>No staff found</p></div>';
+        return;
+      }
+
+      let html = `<div class="table-wrapper"><table class="table">
+        <thead><tr>
+          <th>#</th><th>Name</th><th>Email</th><th>Department</th><th>Availability Slots</th><th>Status</th>
+        </tr></thead><tbody>`;
+
+      data.forEach((s, i) => {
+        const slots = s.availability.length;
+        html += `<tr>
+          <td>${i + 1}</td>
+          <td><strong>${esc(s.name)}</strong></td>
+          <td>${esc(s.email)}</td>
+          <td><span class="badge badge-${s.department === 'HOD' ? 'primary' : 'info'}">${esc(s.department)}</span></td>
+          <td>${slots} slots configured</td>
+          <td><span class="badge badge-${s.is_verified ? 'approved' : 'pending'}">${s.is_verified ? 'Active' : 'Unverified'}</span></td>
+        </tr>`;
+      });
+      html += '</tbody></table></div>';
+      document.getElementById('staff-container').innerHTML = html;
+    }
+
+    async function loadStudents() {
+      const res = await apiFetch('/api/admin/students');
+      if (!res) return;
+      const data = await res.json();
+
+      if (!data.length) {
+        document.getElementById('students-container').innerHTML = '<div class="empty-state"><div class="empty-icon">🎓</div><p>No students found</p></div>';
+        return;
+      }
+
+      let html = `<div class="table-wrapper"><table class="table">
+        <thead><tr>
+          <th>#</th><th>Name</th><th>Email</th><th>Roll No.</th><th>Department</th><th>Status</th><th>Joined</th>
+        </tr></thead><tbody>`;
+
+      data.forEach((s, i) => {
+        html += `<tr>
+          <td>${i + 1}</td>
+          <td><strong>${esc(s.name)}</strong></td>
+          <td>${esc(s.email)}</td>
+          <td>${esc(s.roll_number || '—')}</td>
+          <td>${esc(s.department || '—')}</td>
+          <td><span class="badge badge-${s.is_verified ? 'approved' : 'pending'}">${s.is_verified ? 'Verified' : 'Unverified'}</span></td>
+          <td class="text-muted">${s.created_at ? s.created_at.substring(0, 10) : '—'}</td>
+        </tr>`;
+      });
+      html += '</tbody></table></div>';
+      document.getElementById('students-container').innerHTML = html;
+    }
+
+    async function loadOutpasses() {
+      const res = await apiFetch('/api/admin/outpasses');
+      if (!res) return;
+      const data = await res.json();
+
+      if (!data.length) {
+        document.getElementById('outpasses-container').innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>No outpass requests found</p></div>';
+        return;
+      }
+
+      let html = `<div class="table-wrapper"><table class="table">
+        <thead><tr>
+          <th>#</th><th>Student</th><th>Reason</th><th>Destination</th><th>From</th><th>To</th><th>Status</th><th>HOD Comment</th>
+        </tr></thead><tbody>`;
+
+      data.forEach((row, i) => {
+        html += `<tr>
+          <td>${i + 1}</td>
+          <td>${esc(row.student_name)}<br><span class="text-muted">${esc(row.roll_number || '')}</span></td>
+          <td>${esc(row.reason)}</td>
+          <td>${esc(row.destination)}</td>
+          <td>${row.from_date}</td>
+          <td>${row.to_date}</td>
+          <td><span class="badge badge-${row.status}">${row.status}</span></td>
+          <td>${row.hod_comment ? esc(row.hod_comment) : '<span class="text-muted">—</span>'}</td>
+        </tr>`;
+      });
+      html += '</tbody></table></div>';
+      document.getElementById('outpasses-container').innerHTML = html;
+    }
+
+    async function loadMeetings() {
+      const res = await apiFetch('/api/admin/meetings');
+      if (!res) return;
+      const data = await res.json();
+
+      if (!data.length) {
+        document.getElementById('meetings-container').innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><p>No meetings found</p></div>';
+        return;
+      }
+
+      let html = `<div class="table-wrapper"><table class="table">
+        <thead><tr>
+          <th>#</th><th>Student</th><th>Staff</th><th>Purpose</th><th>Date</th><th>Time</th><th>Status</th>
+        </tr></thead><tbody>`;
+
+      data.forEach((row, i) => {
+        html += `<tr>
+          <td>${i + 1}</td>
+          <td>${esc(row.student_name)}<br><span class="text-muted">${esc(row.roll_number || '')}</span></td>
+          <td>${esc(row.staff_name)}<br><span class="text-muted">${esc(row.staff_department)}</span></td>
+          <td>${esc(row.purpose)}</td>
+          <td>${row.preferred_date}</td>
+          <td>${row.preferred_time}</td>
+          <td><span class="badge badge-${row.status}">${row.status}</span></td>
+        </tr>`;
+      });
+      html += '</tbody></table></div>';
+      document.getElementById('meetings-container').innerHTML = html;
+    }
+
+    async function loadFeedback() {
+      const res = await apiFetch('/api/feedback');
+      if (!res) return;
+      const data = await res.json();
+
+      if (!data.length) {
+        document.getElementById('feedback-container').innerHTML = '<div class="empty-state"><div class="empty-icon">💌</div><p>No feedback submitted yet</p></div>';
+        return;
+      }
+
+      let html = `<div class="table-wrapper"><table class="table">
+        <thead><tr>
+          <th>#</th><th>Name</th><th>Email</th><th>Subject</th><th>Message</th><th>Rating</th><th>Date</th>
+        </tr></thead><tbody>`;
+
+      data.forEach((row, i) => {
+        const stars = row.rating ? '⭐'.repeat(parseInt(row.rating)) : '—';
+        html += `<tr>
+          <td>${i + 1}</td>
+          <td>${esc(row.name || 'Anonymous')}</td>
+          <td>${esc(row.email || '—')}</td>
+          <td>${esc(row.subject || '—')}</td>
+          <td style="max-width:300px">${esc(row.message)}</td>
+          <td>${stars}</td>
+          <td class="text-muted">${row.created_at ? row.created_at.substring(0, 10) : '—'}</td>
+        </tr>`;
+      });
+      html += '</tbody></table></div>';
+      document.getElementById('feedback-container').innerHTML = html;
+    }
+
+    // Init
+    loadStats();
+  </script>
+</body>
+</html>

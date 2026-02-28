@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartStaff – Login</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .register-section { display: none; }
+    .register-link { font-size: 0.85rem; color: var(--primary); cursor: pointer; }
+    .divider { text-align: center; color: var(--gray); font-size: 0.8rem; margin: 0.75rem 0; position: relative; }
+    .divider::before, .divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: var(--border);
+    }
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+    .verify-info { font-size: 0.8rem; color: var(--gray); background: var(--gray-light); padding: 0.5rem 0.75rem; border-radius: var(--radius); margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+  <div class="login-page">
+    <header class="login-header">
+      <div class="login-brand">🎓 SmartStaff</div>
+      <nav class="login-nav">
+        <a href="faq.html">FAQ</a>
+        <a href="feedback.html">Feedback</a>
+      </nav>
+    </header>
+
+    <main class="login-hero">
+      <div class="login-container">
+        <div class="login-box">
+          <div class="login-welcome">
+            <div class="login-logo">🎓</div>
+            <h2>Welcome to SmartStaff</h2>
+            <p>Staff Management &amp; Student Portal</p>
+          </div>
+
+          <!-- Tabs -->
+          <div class="tabs">
+            <button class="tab-btn active" data-tab="admin">Admin</button>
+            <button class="tab-btn" data-tab="staff">Staff</button>
+            <button class="tab-btn" data-tab="student">Student</button>
+          </div>
+
+          <!-- Admin Tab -->
+          <div class="tab-content">
+            <div class="tab-pane active" id="tab-admin">
+              <div id="admin-alert"></div>
+              <form id="admin-login-form">
+                <div class="form-group">
+                  <label class="form-label">Email</label>
+                  <input type="email" id="admin-email" class="form-control" placeholder="admin@smartstaff.com" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Password</label>
+                  <input type="password" id="admin-password" class="form-control" placeholder="Enter password" required />
+                </div>
+                <button type="submit" class="btn btn-primary btn-block btn-lg mt-2">Sign In as Admin</button>
+              </form>
+            </div>
+
+            <!-- Staff Tab -->
+            <div class="tab-pane" id="tab-staff">
+              <div id="staff-alert"></div>
+              <form id="staff-login-form">
+                <div class="form-group">
+                  <label class="form-label">Email</label>
+                  <input type="email" id="staff-email" class="form-control" placeholder="staff@smartstaff.com" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Password</label>
+                  <input type="password" id="staff-password" class="form-control" placeholder="Enter password" required />
+                </div>
+                <button type="submit" class="btn btn-primary btn-block btn-lg mt-2">Sign In as Staff</button>
+              </form>
+            </div>
+
+            <!-- Student Tab -->
+            <div class="tab-pane" id="tab-student">
+              <div id="student-alert"></div>
+
+              <!-- Login Form -->
+              <div id="student-login-section">
+                <form id="student-login-form">
+                  <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="student-email" class="form-control" placeholder="student@email.com" required />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="student-password" class="form-control" placeholder="Enter password" required />
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block btn-lg mt-2">Sign In as Student</button>
+                </form>
+                <div class="divider mt-2">OR</div>
+                <p class="text-center text-muted">Don't have an account? <span class="register-link" onclick="toggleRegister(true)">Register here</span></p>
+              </div>
+
+              <!-- Register Form -->
+              <div id="student-register-section" class="register-section">
+                <form id="student-register-form">
+                  <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" id="reg-name" class="form-control" placeholder="Your full name" required />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="reg-email" class="form-control" placeholder="your@email.com" required />
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label">Roll Number</label>
+                      <input type="text" id="reg-roll" class="form-control" placeholder="Roll No." />
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Department</label>
+                      <input type="text" id="reg-dept" class="form-control" placeholder="Department" />
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="reg-password" class="form-control" placeholder="Choose password" required />
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block btn-lg">Register</button>
+                </form>
+                <div id="verify-info" class="verify-info hidden"></div>
+                <div class="divider mt-2">OR</div>
+                <p class="text-center text-muted">Already have an account? <span class="register-link" onclick="toggleRegister(false)">Sign in here</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-center mt-2" style="color: rgba(255,255,255,0.7); font-size: 0.8rem;">
+          &copy; 2024 SmartStaff. All rights reserved.
+        </p>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script>
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    function toggleRegister(show) {
+      document.getElementById('student-login-section').style.display = show ? 'none' : 'block';
+      document.getElementById('student-register-section').style.display = show ? 'block' : 'none';
+    }
+
+    function showAlert(id, msg, type = 'danger') {
+      const el = document.getElementById(id);
+      el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+      setTimeout(() => el.innerHTML = '', 5000);
+    }
+
+    function showToast(msg, type = 'success') {
+      const c = document.getElementById('toast-container');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+
+    async function doLogin(email, password, alertId, expectedRole) {
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showAlert(alertId, data.error || 'Login failed');
+          return;
+        }
+        if (data.user.role !== expectedRole) {
+          showAlert(alertId, `This portal is for ${expectedRole}s only.`);
+          return;
+        }
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        const redirectMap = { admin: 'admin.html', staff: 'staff.html', student: 'student.html' };
+        window.location.href = redirectMap[data.user.role];
+      } catch (e) {
+        showAlert(alertId, 'Connection error. Please try again.');
+      }
+    }
+
+    // Admin login
+    document.getElementById('admin-login-form').addEventListener('submit', e => {
+      e.preventDefault();
+      doLogin(
+        document.getElementById('admin-email').value,
+        document.getElementById('admin-password').value,
+        'admin-alert', 'admin'
+      );
+    });
+
+    // Staff login
+    document.getElementById('staff-login-form').addEventListener('submit', e => {
+      e.preventDefault();
+      doLogin(
+        document.getElementById('staff-email').value,
+        document.getElementById('staff-password').value,
+        'staff-alert', 'staff'
+      );
+    });
+
+    // Student login
+    document.getElementById('student-login-form').addEventListener('submit', e => {
+      e.preventDefault();
+      doLogin(
+        document.getElementById('student-email').value,
+        document.getElementById('student-password').value,
+        'student-alert', 'student'
+      );
+    });
+
+    // Student register
+    document.getElementById('student-register-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const body = {
+        name: document.getElementById('reg-name').value,
+        email: document.getElementById('reg-email').value,
+        password: document.getElementById('reg-password').value,
+        roll_number: document.getElementById('reg-roll').value,
+        department: document.getElementById('reg-dept').value
+      };
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showAlert('student-alert', data.error || 'Registration failed');
+          return;
+        }
+        const verifyEl = document.getElementById('verify-info');
+        verifyEl.classList.remove('hidden');
+        verifyEl.innerHTML = `✅ Registration successful! <br>
+          <a href="/api/auth/verify-email?token=${data.verificationToken}" target="_blank">Click here to verify your email</a> (token: ${data.verificationToken.substring(0, 16)}...)`;
+        showAlert('student-alert', 'Registration successful! Please verify your email.', 'success');
+      } catch (err) {
+        showAlert('student-alert', 'Connection error. Please try again.');
+      }
+    });
+
+    // If already logged in, redirect
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
+    if (token && user) {
+      try {
+        const u = JSON.parse(user);
+        const map = { admin: 'admin.html', staff: 'staff.html', student: 'student.html' };
+        if (map[u.role]) window.location.href = map[u.role];
+      } catch(e) {}
+    }
+  </script>
+</body>
+</html>
