@@ -1,0 +1,15 @@
+{
+  "name": "smartstaff",
+  "version": "1.0.0",
+  "description": "A smart staff management application",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test src/server.test.js"
+  },
+  "keywords": ["staff", "management", "hr"],
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

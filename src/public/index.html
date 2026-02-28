@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartStaff</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #333; }
+    header { background: #2563eb; color: #fff; padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; }
+    header h1 { font-size: 1.5rem; }
+    main { max-width: 960px; margin: 2rem auto; padding: 0 1rem; }
+    .card { background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.1); padding: 1.5rem; margin-bottom: 2rem; }
+    h2 { margin-bottom: 1rem; font-size: 1.1rem; color: #1e40af; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: .6rem .8rem; border-bottom: 1px solid #e5e7eb; }
+    th { background: #eff6ff; font-weight: 600; color: #1e40af; }
+    tr:hover td { background: #f9fafb; }
+    .btn { padding: .4rem .9rem; border: none; border-radius: 5px; cursor: pointer; font-size: .85rem; }
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-danger  { background: #ef4444; color: #fff; }
+    .btn-edit    { background: #f59e0b; color: #fff; }
+    form .row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: .8rem; }
+    form input { flex: 1; min-width: 160px; padding: .5rem .7rem; border: 1px solid #d1d5db; border-radius: 5px; font-size: .9rem; }
+    form .actions { display: flex; gap: .5rem; }
+    #msg { padding: .5rem 1rem; border-radius: 5px; display: none; margin-bottom: 1rem; }
+    #msg.ok  { background: #d1fae5; color: #065f46; display: block; }
+    #msg.err { background: #fee2e2; color: #991b1b; display: block; }
+  </style>
+</head>
+<body>
+<header>
+  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="white" viewBox="0 0 24 24">
+    <path d="M17 20h5v-2a4 4 0 00-5.197-3.787M17 20H7m10 0v-2c0-.768-.107-1.51-.303-2.213M7 20H2v-2a4 4 0 015.197-3.787M7 20v-2c0-.768.107-1.51.303-2.213M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+  </svg>
+  <h1>SmartStaff</h1>
+</header>
+<main>
+  <div id="msg"></div>
+
+  <div class="card">
+    <h2 id="form-title">Add Staff Member</h2>
+    <form id="staff-form">
+      <input type="hidden" id="edit-id" />
+      <div class="row">
+        <input id="f-name"  placeholder="Full Name *" required />
+        <input id="f-role"  placeholder="Role *"      required />
+      </div>
+      <div class="row">
+        <input id="f-dept"  placeholder="Department *" required />
+        <input id="f-email" placeholder="Email *"      type="email" required />
+      </div>
+      <div class="actions">
+        <button type="submit" class="btn btn-primary" id="submit-btn">Add Member</button>
+        <button type="button" class="btn" id="cancel-btn" style="display:none;background:#6b7280;color:#fff">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Staff Directory</h2>
+    <table>
+      <thead><tr><th>Name</th><th>Role</th><th>Department</th><th>Email</th><th>Actions</th></tr></thead>
+      <tbody id="staff-table"></tbody>
+    </table>
+  </div>
+</main>
+<script>
+  const tableBody = document.getElementById('staff-table');
+  const form      = document.getElementById('staff-form');
+  const editIdEl  = document.getElementById('edit-id');
+  const msg       = document.getElementById('msg');
+
+  function showMsg(text, type) {
+    msg.textContent = text; msg.className = type;
+    setTimeout(() => { msg.className = ''; msg.textContent = ''; }, 3000);
+  }
+
+  async function loadStaff() {
+    const res = await fetch('/api/staff');
+    const data = await res.json();
+    tableBody.innerHTML = data.map(s => `
+      <tr>
+        <td>${escHtml(s.name)}</td>
+        <td>${escHtml(s.role)}</td>
+        <td>${escHtml(s.department)}</td>
+        <td>${escHtml(s.email)}</td>
+        <td>
+          <button class="btn btn-edit" onclick="editMember(${s.id})">Edit</button>
+          <button class="btn btn-danger" onclick="deleteMember(${s.id})">Delete</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const body = { name: document.getElementById('f-name').value, role: document.getElementById('f-role').value,
+                   department: document.getElementById('f-dept').value, email: document.getElementById('f-email').value };
+    const id = editIdEl.value;
+    const url = id ? `/api/staff/${id}` : '/api/staff';
+    const method = id ? 'PUT' : 'POST';
+    const res = await fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    if (res.ok) { showMsg(id ? 'Updated successfully' : 'Added successfully', 'ok'); cancelEdit(); loadStaff(); }
+    else { const err = await res.json(); showMsg(err.error || 'Error', 'err'); }
+  });
+
+  async function deleteMember(id) {
+    if (!confirm('Delete this staff member?')) return;
+    const res = await fetch(`/api/staff/${id}`, { method: 'DELETE' });
+    if (res.ok) { showMsg('Deleted successfully', 'ok'); loadStaff(); }
+    else showMsg('Failed to delete staff member', 'err');
+  }
+
+  async function editMember(id) {
+    const res = await fetch(`/api/staff/${id}`);
+    if (!res.ok) { showMsg('Failed to load staff member', 'err'); return; }
+    const s = await res.json();
+    editIdEl.value = id;
+    document.getElementById('f-name').value  = s.name;
+    document.getElementById('f-role').value  = s.role;
+    document.getElementById('f-dept').value  = s.department;
+    document.getElementById('f-email').value = s.email;
+    document.getElementById('form-title').textContent = 'Edit Staff Member';
+    document.getElementById('submit-btn').textContent = 'Update Member';
+    document.getElementById('cancel-btn').style.display = 'inline-block';
+  }
+
+  function cancelEdit() {
+    editIdEl.value = '';
+    form.reset();
+    document.getElementById('form-title').textContent = 'Add Staff Member';
+    document.getElementById('submit-btn').textContent = 'Add Member';
+    document.getElementById('cancel-btn').style.display = 'none';
+  }
+  document.getElementById('cancel-btn').addEventListener('click', cancelEdit);
+
+  loadStaff();
+</script>
+</body>
+</html>
