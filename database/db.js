@@ -85,12 +85,12 @@ function seedData() {
 
   // Staff members
   const staffMembers = [
-    { name: 'Dr. Archana', email: 'archana@smartstaff.com', department: 'HOD' },
-    { name: 'Pavithra', email: 'pavithra@smartstaff.com', department: 'Faculty' },
-    { name: 'Jima', email: 'jima@smartstaff.com', department: 'Faculty' },
-    { name: 'Anusree', email: 'anusree@smartstaff.com', department: 'Faculty' },
-    { name: 'Renjith', email: 'renjith@smartstaff.com', department: 'Faculty' },
-    { name: 'Sreedhanya', email: 'sreedhanya@smartstaff.com', department: 'Faculty' }
+    { name: 'DR. Archana', email: 'archana@smartstaff.com', department: 'HOD' },
+    { name: 'Miss Pavithra', email: 'pavithra@smartstaff.com', department: 'Faculty' },
+    { name: 'Miss Jima', email: 'jima@smartstaff.com', department: 'Faculty' },
+    { name: 'Miss Anusree', email: 'anusree@smartstaff.com', department: 'Faculty' },
+    { name: 'DR. Renjith', email: 'renjith@smartstaff.com', department: 'Faculty' },
+    { name: 'Miss SreeDhanya', email: 'sreedhanya@smartstaff.com', department: 'Faculty' }
   ];
 
   const staffHash = bcrypt.hashSync('staff123', 10);
