@@ -1,5 +1,9 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
+if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET environment variable must be set in production');
+  process.exit(1);
+}
 const JWT_SECRET = process.env.JWT_SECRET || 'smartstaff-secret-key-2024';
 
 function authenticateToken(req, res, next) {
