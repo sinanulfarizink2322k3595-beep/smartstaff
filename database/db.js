@@ -85,7 +85,7 @@ function seedData() {
 
   // Staff members
   const staffMembers = [
-    { name: 'DR. Archana', email: 'archana@smartstaff.com', department: 'HOD' },
+    { name: 'Dr. Archana', email: 'archana@smartstaff.com', department: 'HOD' },
     { name: 'Pavithra', email: 'pavithra@smartstaff.com', department: 'Faculty' },
     { name: 'Jima', email: 'jima@smartstaff.com', department: 'Faculty' },
     { name: 'Anusree', email: 'anusree@smartstaff.com', department: 'Faculty' },
