@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartStaff – Staff Portal</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-icon">🎓</span> SmartStaff
+      </div>
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <a href="#" class="active" data-section="dashboard"><span class="nav-icon">🏠</span> Dashboard</a>
+        <a href="#" data-section="availability"><span class="nav-icon">📅</span> My Availability</a>
+        <a href="#" data-section="meetings"><span class="nav-icon">💬</span> Meeting Requests</a>
+        <a href="#" id="outpass-nav-link" data-section="outpasses" class="hidden"><span class="nav-icon">📋</span> Outpass Approvals</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="avatar" id="user-avatar">S</div>
+          <div class="user-info">
+            <div class="user-name" id="user-name">Staff</div>
+            <div class="user-role" id="user-dept">Faculty</div>
+          </div>
+        </div>
+        <button class="btn-logout" onclick="logout()">🚪 Logout</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="top-bar">
+        <h1 id="page-title">Dashboard</h1>
+        <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+      </div>
+
+      <div class="page-content">
+        <!-- Dashboard -->
+        <div class="content-section active" id="section-dashboard">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon green">💬</div>
+              <div class="stat-info">
+                <div class="stat-value" id="stat-meetings">0</div>
+                <div class="stat-label">Meeting Requests</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon yellow">⏳</div>
+              <div class="stat-info">
+                <div class="stat-value" id="stat-pending-meetings">0</div>
+                <div class="stat-label">Pending Meetings</div>
+              </div>
+            </div>
+            <div class="stat-card" id="outpass-stat-card" style="display:none">
+              <div class="stat-icon red">📋</div>
+              <div class="stat-info">
+                <div class="stat-value" id="stat-pending-outpasses">0</div>
+                <div class="stat-label">Pending Outpasses</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">👋 Welcome to SmartStaff Staff Portal</div>
+            <p class="text-muted">Manage your availability schedule, review meeting requests, and (HOD) approve outpass applications from the sidebar.</p>
+          </div>
+        </div>
+
+        <!-- Availability Management -->
+        <div class="content-section" id="section-availability">
+          <div class="card">
+            <div class="card-header">📅 Manage My Availability</div>
+            <div id="avail-alert"></div>
+            <p class="text-muted mb-2">Check the slots you are available. Click Save when done.</p>
+            <div class="table-wrapper">
+              <table class="avail-table">
+                <thead>
+                  <tr>
+                    <th>Day</th>
+                    <th>Morning (09:00–12:00)</th>
+                    <th>Afternoon (14:00–17:00)</th>
+                  </tr>
+                </thead>
+                <tbody id="avail-table-body">
+                </tbody>
+              </table>
+            </div>
+            <div class="mt-2">
+              <button class="btn btn-primary" onclick="saveAvailability()">💾 Save Availability</button>
+              <button class="btn btn-outline" onclick="loadMyAvailability()">🔄 Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Meeting Requests -->
+        <div class="content-section" id="section-meetings">
+          <div class="card">
+            <div class="card-header">💬 Meeting Requests</div>
+            <div id="meetings-container">
+              <div class="loading-wrapper"><div class="spinner"></div><p>Loading...</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Outpass Approvals (HOD only) -->
+        <div class="content-section" id="section-outpasses">
+          <div class="card">
+            <div class="card-header">📋 Pending Outpass Approvals</div>
+            <div id="outpasses-container">
+              <div class="loading-wrapper"><div class="spinner"></div><p>Loading...</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Action Modal -->
+  <div class="modal-overlay hidden" id="action-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-title">Action</h3>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" id="modal-item-info"></label>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Comment (optional)</label>
+          <textarea id="modal-comment" class="form-control" rows="3" placeholder="Add a comment..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-success" id="modal-confirm-btn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    if (!token || !user || user.role !== 'staff') {
+      window.location.href = 'index.html';
+    }
+
+    document.getElementById('user-name').textContent = user.name;
+    document.getElementById('user-dept').textContent = user.department || 'Faculty';
+    document.getElementById('user-avatar').textContent = user.name.charAt(0).toUpperCase();
+
+    // Show HOD sections - based on department field (server-side enforced)
+    const isHOD = user.department === 'HOD';
+    if (isHOD) {
+      document.getElementById('outpass-nav-link').classList.remove('hidden');
+      document.getElementById('outpass-stat-card').style.display = 'flex';
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'index.html';
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    function showToast(msg, type = 'success') {
+      const c = document.getElementById('toast-container');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+
+    function showAlert(id, msg, type = 'success') {
+      const el = document.getElementById(id);
+      el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+      setTimeout(() => el.innerHTML = '', 5000);
+    }
+
+    async function apiFetch(url, options = {}) {
+      const res = await fetch(url, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          ...(options.headers || {})
+        }
+      });
+      if (res.status === 401) { logout(); return null; }
+      return res;
+    }
+
+    // Navigation
+    const titles = {
+      dashboard: 'Dashboard',
+      availability: 'My Availability',
+      meetings: 'Meeting Requests',
+      outpasses: 'Outpass Approvals'
+    };
+
+    const sectionLoaders = {
+      availability: loadMyAvailability,
+      meetings: loadMeetings,
+      outpasses: loadOutpasses
+    };
+
+    document.querySelectorAll('.sidebar-nav a').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const sec = link.dataset.section;
+        document.querySelectorAll('.sidebar-nav a').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        document.getElementById('section-' + sec).classList.add('active');
+        document.getElementById('page-title').textContent = titles[sec] || sec;
+        if (sectionLoaders[sec]) sectionLoaders[sec]();
+        document.getElementById('sidebar').classList.remove('open');
+      });
+    });
+
+    // Availability
+    const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const checkboxState = {};
+
+    function buildAvailTable() {
+      const tbody = document.getElementById('avail-table-body');
+      let html = '';
+      DAYS.forEach(day => {
+        html += `<tr>
+          <td><strong>${day}</strong></td>
+          <td><label><input type="checkbox" id="avail-${day}-morning" /> Morning 09:00–12:00</label></td>
+          <td><label><input type="checkbox" id="avail-${day}-afternoon" /> Afternoon 14:00–17:00</label></td>
+        </tr>`;
+      });
+      tbody.innerHTML = html;
+    }
+
+    async function loadMyAvailability() {
+      buildAvailTable();
+      const res = await apiFetch('/api/availability/my');
+      if (!res) return;
+      const data = await res.json();
+
+      // Uncheck all first
+      DAYS.forEach(day => {
+        document.getElementById(`avail-${day}-morning`).checked = false;
+        document.getElementById(`avail-${day}-afternoon`).checked = false;
+      });
+
+      data.forEach(row => {
+        const el = document.getElementById(`avail-${row.day_of_week}-${row.slot}`);
+        if (el) el.checked = true;
+      });
+    }
+
+    async function saveAvailability() {
+      const slots = [];
+      DAYS.forEach(day => {
+        if (document.getElementById(`avail-${day}-morning`).checked) {
+          slots.push({ day_of_week: day, slot: 'morning', start_time: '09:00', end_time: '12:00' });
+        }
+        if (document.getElementById(`avail-${day}-afternoon`).checked) {
+          slots.push({ day_of_week: day, slot: 'afternoon', start_time: '14:00', end_time: '17:00' });
+        }
+      });
+
+      const res = await apiFetch('/api/availability', {
+        method: 'PUT',
+        body: JSON.stringify({ slots })
+      });
+      if (!res) return;
+      const data = await res.json();
+      if (res.ok) {
+        showAlert('avail-alert', '✅ Availability saved successfully!', 'success');
+        showToast('Availability updated!');
+      } else {
+        showAlert('avail-alert', data.error || 'Failed to save', 'danger');
+      }
+    }
+
+    // Meetings
+    async function loadMeetings() {
+      const res = await apiFetch('/api/meetings/my');
+      if (!res) return;
+      const data = await res.json();
+
+      if (!data.length) {
+        document.getElementById('meetings-container').innerHTML = '<div class="empty-state"><div class="empty-icon">💬</div><p>No meeting requests yet</p></div>';
+        return;
+      }
+
+      let html = `<div class="table-wrapper"><table class="table">
+        <thead><tr>
+          <th>#</th><th>Student</th><th>Purpose</th><th>Date</th><th>Time</th><th>Status</th><th>Actions</th>
+        </tr></thead><tbody>`;
+
+      data.forEach((row, i) => {
+        const canAct = row.status === 'pending';
+        html += `<tr>
+          <td>${i + 1}</td>
+          <td>${esc(row.student_name)}<br><span class="text-muted">${esc(row.roll_number || '')}</span></td>
+          <td>${esc(row.purpose)}</td>
+          <td>${row.preferred_date}</td>
+          <td>${row.preferred_time}</td>
+          <td><span class="badge badge-${row.status}">${row.status}</span></td>
+          <td>
+            ${canAct ? `
+              <button class="btn btn-success btn-sm" onclick="meetingAction(${row.id}, 'confirmed', '${esc(row.student_name)} - ${esc(row.purpose)}')">✅ Confirm</button>
+              <button class="btn btn-danger btn-sm" onclick="meetingAction(${row.id}, 'rejected', '${esc(row.student_name)} - ${esc(row.purpose)}')">❌ Reject</button>
+            ` : '<span class="text-muted">—</span>'}
+          </td>
+        </tr>`;
+      });
+      html += '</tbody></table></div>';
+      document.getElementById('meetings-container').innerHTML = html;
+    }
+
+    // Outpasses (HOD)
+    async function loadOutpasses() {
+      if (!isHOD) return;
+      const res = await apiFetch('/api/outpass/pending');
+      if (!res) return;
+      const data = await res.json();
+
+      if (!data.length) {
+        document.getElementById('outpasses-container').innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>No pending outpass requests</p></div>';
+        return;
+      }
+
+      let html = `<div class="table-wrapper"><table class="table">
+        <thead><tr>
+          <th>#</th><th>Student</th><th>Reason</th><th>Destination</th><th>From</th><th>To</th><th>Actions</th>
+        </tr></thead><tbody>`;
+
+      data.forEach((row, i) => {
+        html += `<tr>
+          <td>${i + 1}</td>
+          <td>${esc(row.student_name)}<br><span class="text-muted">${esc(row.student_email)}</span></td>
+          <td>${esc(row.reason)}</td>
+          <td>${esc(row.destination)}</td>
+          <td>${row.from_date}</td>
+          <td>${row.to_date}</td>
+          <td>
+            <button class="btn btn-success btn-sm" onclick="outpassAction(${row.id}, 'approved', '${esc(row.student_name)}')">✅ Approve</button>
+            <button class="btn btn-danger btn-sm" onclick="outpassAction(${row.id}, 'rejected', '${esc(row.student_name)}')">❌ Reject</button>
+          </td>
+        </tr>`;
+      });
+      html += '</tbody></table></div>';
+      document.getElementById('outpasses-container').innerHTML = html;
+    }
+
+    // Modal
+    let modalCallback = null;
+
+    function meetingAction(id, status, info) {
+      openModal(
+        `${status === 'confirmed' ? '✅ Confirm' : '❌ Reject'} Meeting`,
+        info,
+        async (comment) => {
+          const res = await apiFetch(`/api/meetings/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ status, staff_comment: comment })
+          });
+          if (!res) return;
+          if (res.ok) {
+            showToast(`Meeting ${status} successfully!`);
+            loadMeetings();
+            loadDashboardStats();
+          } else {
+            const d = await res.json();
+            showToast(d.error || 'Failed', 'error');
+          }
+        }
+      );
+    }
+
+    function outpassAction(id, status, info) {
+      openModal(
+        `${status === 'approved' ? '✅ Approve' : '❌ Reject'} Outpass`,
+        info,
+        async (comment) => {
+          const res = await apiFetch(`/api/outpass/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ status, hod_comment: comment })
+          });
+          if (!res) return;
+          if (res.ok) {
+            showToast(`Outpass ${status} successfully!`);
+            loadOutpasses();
+            loadDashboardStats();
+          } else {
+            const d = await res.json();
+            showToast(d.error || 'Failed', 'error');
+          }
+        }
+      );
+    }
+
+    function openModal(title, info, cb) {
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-item-info').textContent = info;
+      document.getElementById('modal-comment').value = '';
+      document.getElementById('action-modal').classList.remove('hidden');
+      const confirmBtn = document.getElementById('modal-confirm-btn');
+      confirmBtn.onclick = async () => {
+        closeModal();
+        await cb(document.getElementById('modal-comment').value);
+      };
+    }
+
+    function closeModal() {
+      document.getElementById('action-modal').classList.add('hidden');
+    }
+
+    async function loadDashboardStats() {
+      const res = await apiFetch('/api/meetings/my');
+      if (!res) return;
+      const meetings = await res.json();
+      document.getElementById('stat-meetings').textContent = meetings.length;
+      document.getElementById('stat-pending-meetings').textContent = meetings.filter(m => m.status === 'pending').length;
+
+      if (isHOD) {
+        const opRes = await apiFetch('/api/outpass/pending');
+        if (!opRes) return;
+        const outpasses = await opRes.json();
+        document.getElementById('stat-pending-outpasses').textContent = outpasses.length;
+      }
+    }
+
+    function esc(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, '&#39;');
+    }
+
+    // Init
+    buildAvailTable();
+    loadMyAvailability();
+    loadDashboardStats();
+  </script>
+</body>
+</html>

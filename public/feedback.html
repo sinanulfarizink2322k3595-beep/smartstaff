@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartStaff – Feedback</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body style="background: var(--gray-light); min-height:100vh;">
+  <div class="feedback-page-header">
+    <h1>💌 Share Your Feedback</h1>
+    <p>We value your opinion. Help us improve SmartStaff.</p>
+    <div style="margin-top:1rem"><a href="index.html" style="color:rgba(255,255,255,0.85); border:1px solid rgba(255,255,255,0.5); padding:0.4rem 1rem; border-radius:6px; text-decoration:none;">← Back to Login</a></div>
+  </div>
+
+  <div class="feedback-layout">
+    <!-- Submit Feedback -->
+    <div class="card">
+      <div class="card-header">✍️ Submit Feedback</div>
+      <div id="feedback-alert"></div>
+      <form id="feedback-form">
+        <div class="form-group">
+          <label class="form-label">Your Name (optional)</label>
+          <input type="text" id="fb-name" class="form-control" placeholder="Anonymous" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email (optional)</label>
+          <input type="email" id="fb-email" class="form-control" placeholder="your@email.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subject</label>
+          <input type="text" id="fb-subject" class="form-control" placeholder="What is this about?" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Your Rating</label>
+          <div class="star-rating" id="star-rating">
+            <button type="button" data-val="1">★</button>
+            <button type="button" data-val="2">★</button>
+            <button type="button" data-val="3">★</button>
+            <button type="button" data-val="4">★</button>
+            <button type="button" data-val="5">★</button>
+          </div>
+          <input type="hidden" id="fb-rating" value="" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Message <span style="color:red">*</span></label>
+          <textarea id="fb-message" class="form-control" rows="5" placeholder="Tell us what you think..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Send Feedback</button>
+      </form>
+    </div>
+
+    <!-- Recent Feedback -->
+    <div class="card">
+      <div class="card-header">📋 Recent Feedback</div>
+      <div id="feedback-list">
+        <div class="loading-wrapper"><div class="spinner"></div><p>Loading feedback...</p></div>
+      </div>
+    </div>
+  </div>
+
+  <footer style="text-align:center; padding:2rem; color: var(--gray); font-size: 0.85rem;">
+    &copy; 2024 SmartStaff. All rights reserved.
+  </footer>
+
+  <div id="toast-container"></div>
+
+  <script>
+    let selectedRating = 0;
+
+    document.querySelectorAll('#star-rating button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedRating = parseInt(btn.dataset.val);
+        document.getElementById('fb-rating').value = selectedRating;
+        document.querySelectorAll('#star-rating button').forEach((b, idx) => {
+          b.classList.toggle('active', idx < selectedRating);
+        });
+      });
+
+      btn.addEventListener('mouseover', () => {
+        const val = parseInt(btn.dataset.val);
+        document.querySelectorAll('#star-rating button').forEach((b, idx) => {
+          b.style.color = idx < val ? 'var(--warning)' : 'var(--border)';
+        });
+      });
+
+      btn.addEventListener('mouseout', () => {
+        document.querySelectorAll('#star-rating button').forEach((b, idx) => {
+          b.style.color = idx < selectedRating ? 'var(--warning)' : 'var(--border)';
+        });
+      });
+    });
+
+    function showAlert(msg, type = 'success') {
+      const el = document.getElementById('feedback-alert');
+      el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+      setTimeout(() => el.innerHTML = '', 5000);
+    }
+
+    function showToast(msg, type = 'success') {
+      const c = document.getElementById('toast-container');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+
+    function esc(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    document.getElementById('feedback-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const body = {
+        name: document.getElementById('fb-name').value || null,
+        email: document.getElementById('fb-email').value || null,
+        subject: document.getElementById('fb-subject').value || null,
+        message: document.getElementById('fb-message').value,
+        rating: selectedRating || null
+      };
+
+      try {
+        const res = await fetch('/api/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showAlert('✅ Thank you! Your feedback has been submitted.', 'success');
+          document.getElementById('feedback-form').reset();
+          selectedRating = 0;
+          document.querySelectorAll('#star-rating button').forEach(b => {
+            b.classList.remove('active');
+            b.style.color = 'var(--border)';
+          });
+          loadPublicFeedback();
+        } else {
+          showAlert(data.error || 'Failed to submit', 'danger');
+        }
+      } catch (err) {
+        showAlert('Connection error', 'danger');
+      }
+    });
+
+    async function loadPublicFeedback() {
+      // Try to load feedback (may fail if not admin - that's ok, show a message)
+      const token = localStorage.getItem('token');
+      if (!token) {
+        document.getElementById('feedback-list').innerHTML =
+          '<div class="empty-state"><div class="empty-icon">🔒</div><p>Log in as admin to view all feedback</p></div>';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/feedback', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.status === 403 || res.status === 401) {
+          document.getElementById('feedback-list').innerHTML =
+            '<div class="empty-state"><div class="empty-icon">🔒</div><p>Admin access required to view feedback</p></div>';
+          return;
+        }
+        const data = await res.json();
+        if (!data.length) {
+          document.getElementById('feedback-list').innerHTML =
+            '<div class="empty-state"><div class="empty-icon">💬</div><p>No feedback submitted yet</p></div>';
+          return;
+        }
+
+        let html = '';
+        data.slice(0, 10).forEach(row => {
+          const stars = row.rating ? '⭐'.repeat(parseInt(row.rating)) : '';
+          html += `<div class="card mb-1" style="padding:1rem; box-shadow:none; border:1px solid var(--border);">
+            <div class="flex-between mb-1">
+              <strong>${esc(row.name || 'Anonymous')}</strong>
+              <span class="text-muted" style="font-size:0.75rem">${row.created_at ? row.created_at.substring(0, 10) : ''}</span>
+            </div>
+            ${row.subject ? `<div class="text-muted mb-1" style="font-size:0.8rem">${esc(row.subject)}</div>` : ''}
+            <p style="font-size:0.875rem">${esc(row.message)}</p>
+            ${stars ? `<div style="margin-top:0.25rem">${stars}</div>` : ''}
+          </div>`;
+        });
+        document.getElementById('feedback-list').innerHTML = html;
+      } catch (err) {
+        document.getElementById('feedback-list').innerHTML =
+          '<div class="empty-state"><div class="empty-icon">❌</div><p>Could not load feedback</p></div>';
+      }
+    }
+
+    loadPublicFeedback();
+  </script>
+</body>
+</html>

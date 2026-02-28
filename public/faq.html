@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartStaff – FAQ</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="faq-page">
+  <div class="faq-hero">
+    <h1>❓ Frequently Asked Questions</h1>
+    <p>Everything you need to know about SmartStaff</p>
+    <div style="margin-top:1rem"><a href="index.html" style="color:rgba(255,255,255,0.85); border:1px solid rgba(255,255,255,0.5); padding:0.4rem 1rem; border-radius:6px; text-decoration:none;">← Back to Login</a></div>
+  </div>
+
+  <div class="faq-content">
+    <div class="faq-item">
+      <div class="faq-question">What is SmartStaff? <span>+</span></div>
+      <div class="faq-answer">SmartStaff is a web-based staff and student management system designed for educational institutions. It streamlines outpass requests, staff availability tracking, meeting scheduling, and administrative management.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">How do I register as a student? <span>+</span></div>
+      <div class="faq-answer">Go to the Student tab on the login page and click "Register here". Fill in your name, email, roll number, department, and password. After registration, verify your email using the link provided to activate your account.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">How do I submit an outpass request? <span>+</span></div>
+      <div class="faq-answer">After logging in to your student portal, navigate to "Outpass Request" in the sidebar. Fill in the reason, destination, and travel dates, then submit. The HOD (Dr. Archana) will review and approve or reject your request.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">Who approves outpass requests? <span>+</span></div>
+      <div class="faq-answer">Outpass requests are reviewed and approved by the Head of Department (HOD), Dr. Archana. You can track the status of your outpass from "My Outpasses" in your student portal.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">How do I schedule a meeting with a staff member? <span>+</span></div>
+      <div class="faq-answer">Log in to your student portal and go to "Meeting Request". Select the staff member you want to meet, choose a purpose from the dropdown, and pick your preferred date and time. The staff member will confirm or reject your request.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">How can I see staff availability? <span>+</span></div>
+      <div class="faq-answer">In the student portal, navigate to "Staff Availability" to view a chart and detailed schedule of when each staff member is available. This helps you choose the right time to request a meeting.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">How does a staff member update their availability? <span>+</span></div>
+      <div class="faq-answer">Staff members can log in to the Staff Portal and navigate to "My Availability". They can check/uncheck morning and afternoon slots for each day of the week (Monday–Saturday) and save their schedule.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">What are the default availability hours? <span>+</span></div>
+      <div class="faq-answer">By default, all staff are available in the afternoon (14:00–17:00) on Monday through Saturday, and in the morning (09:00–12:00) on Monday, Wednesday, and Friday.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">What can admins do in SmartStaff? <span>+</span></div>
+      <div class="faq-answer">Administrators have access to the Admin Portal where they can view statistics, manage staff and student records, review all outpass requests and meeting schedules, and read submitted feedback.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">How do I submit feedback? <span>+</span></div>
+      <div class="faq-answer">Visit the Feedback page from the login screen. You can submit feedback anonymously or with your contact details. Rate your experience with stars and provide a message. All feedback is reviewed by the administrator.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">Is my data secure? <span>+</span></div>
+      <div class="faq-answer">Yes. All passwords are securely hashed using bcryptjs. Authentication is handled via JWT tokens that expire after 24 hours. Your credentials are never stored in plain text.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">What if I forget my password? <span>+</span></div>
+      <div class="faq-answer">Please contact your system administrator to reset your password. Future versions of SmartStaff will include a self-service password reset feature via email.</div>
+    </div>
+  </div>
+
+  <footer style="text-align:center; padding:2rem; color: var(--gray); font-size: 0.85rem;">
+    &copy; 2024 SmartStaff. All rights reserved.
+  </footer>
+
+  <script>
+    document.querySelectorAll('.faq-question').forEach(q => {
+      q.addEventListener('click', () => {
+        const item = q.parentElement;
+        const answer = item.querySelector('.faq-answer');
+        const span = q.querySelector('span');
+        const isOpen = answer.classList.contains('open');
+        // Close all
+        document.querySelectorAll('.faq-answer').forEach(a => a.classList.remove('open'));
+        document.querySelectorAll('.faq-question').forEach(qq => {
+          qq.classList.remove('open');
+          qq.querySelector('span').textContent = '+';
+        });
+        if (!isOpen) {
+          answer.classList.add('open');
+          q.classList.add('open');
+          span.textContent = '−';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
